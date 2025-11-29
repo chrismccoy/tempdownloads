@@ -1,0 +1,121 @@
+/**
+ * Error Code Constants.
+ *
+ * Centralized error codes for consistent error handling and client identification.
+ */
+
+/**
+ * Validation error codes.
+ */
+const VALIDATION_ERROR = 'VALIDATION_ERROR';
+const INVALID_FILE_TYPE = 'INVALID_FILE_TYPE';
+const FILE_TOO_LARGE = 'FILE_TOO_LARGE';
+const INVALID_CSRF_TOKEN = 'INVALID_CSRF_TOKEN';
+
+/**
+ * Authentication error codes.
+ */
+const UNAUTHORIZED = 'UNAUTHORIZED';
+const FORBIDDEN = 'FORBIDDEN';
+const INVALID_CREDENTIALS = 'INVALID_CREDENTIALS';
+const SESSION_EXPIRED = 'SESSION_EXPIRED';
+const ACCOUNT_PENDING = 'ACCOUNT_PENDING';
+const ACCOUNT_REVOKED = 'ACCOUNT_REVOKED';
+
+/**
+ * Resource error codes.
+ */
+const NOT_FOUND = 'NOT_FOUND';
+const RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND';
+const LINK_NOT_FOUND = 'LINK_NOT_FOUND';
+const USER_NOT_FOUND = 'USER_NOT_FOUND';
+
+/**
+ * Conflict error codes.
+ */
+const CONFLICT = 'CONFLICT';
+const DUPLICATE_ENTRY = 'DUPLICATE_ENTRY';
+const USERNAME_TAKEN = 'USERNAME_TAKEN';
+const EMAIL_TAKEN = 'EMAIL_TAKEN';
+
+/**
+ * Rate limiting error codes.
+ */
+const RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED';
+const TOO_MANY_REQUESTS = 'TOO_MANY_REQUESTS';
+
+/**
+ * Server error codes.
+ */
+const INTERNAL_ERROR = 'INTERNAL_ERROR';
+const DATABASE_ERROR = 'DATABASE_ERROR';
+const STORAGE_ERROR = 'STORAGE_ERROR';
+
+/**
+ * Timeout error codes.
+ */
+const REQUEST_TIMEOUT = 'REQUEST_TIMEOUT';
+const GATEWAY_TIMEOUT = 'GATEWAY_TIMEOUT';
+
+/**
+ * Link-specific error codes.
+ */
+const LINK_EXPIRED = 'LINK_EXPIRED';
+const LINK_BURNED = 'LINK_BURNED';
+const INVALID_PASSWORD = 'INVALID_PASSWORD';
+
+/**
+ * Upload error codes.
+ */
+const UPLOAD_FAILED = 'UPLOAD_FAILED';
+const STORAGE_QUOTA_EXCEEDED = 'STORAGE_QUOTA_EXCEEDED';
+
+module.exports = {
+  // Validation
+  VALIDATION_ERROR,
+  INVALID_FILE_TYPE,
+  FILE_TOO_LARGE,
+  INVALID_CSRF_TOKEN,
+
+  // Authentication
+  UNAUTHORIZED,
+  FORBIDDEN,
+  INVALID_CREDENTIALS,
+  SESSION_EXPIRED,
+  ACCOUNT_PENDING,
+  ACCOUNT_REVOKED,
+
+  // Resources
+  NOT_FOUND,
+  RESOURCE_NOT_FOUND,
+  LINK_NOT_FOUND,
+  USER_NOT_FOUND,
+
+  // Conflicts
+  CONFLICT,
+  DUPLICATE_ENTRY,
+  USERNAME_TAKEN,
+  EMAIL_TAKEN,
+
+  // Rate Limiting
+  RATE_LIMIT_EXCEEDED,
+  TOO_MANY_REQUESTS,
+
+  // Server Errors
+  INTERNAL_ERROR,
+  DATABASE_ERROR,
+  STORAGE_ERROR,
+
+  // Timeouts
+  REQUEST_TIMEOUT,
+  GATEWAY_TIMEOUT,
+
+  // Link Errors
+  LINK_EXPIRED,
+  LINK_BURNED,
+  INVALID_PASSWORD,
+
+  // Upload Errors
+  UPLOAD_FAILED,
+  STORAGE_QUOTA_EXCEEDED,
+};

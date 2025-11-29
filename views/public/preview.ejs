@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="/css/app.css" rel="stylesheet" />
+  <link href="/css/preview.css" rel="stylesheet" />
+</head>
+<body>
+
+  <div class="preview-header">
+    <h1>📄 <%= link.original_name %></h1>
+    <div class="actions">
+      <a href="/download/<%= link.short_id %>" class="btn">← Back</a>
+      <a href="/d/<%= link.short_id %>" class="btn">⬇ Download</a>
+    </div>
+  </div>
+
+  <div class="preview-container">
+    <% if (previewType === 'image') { %>
+      <img
+        src="/preview/<%= link.short_id %>/stream"
+        alt="<%= link.original_name %>"
+        class="preview-image preview-content"
+        onload="hideLoading()"
+        onerror="showError('Failed to load image')"
+      />
+
+    <% } else if (previewType === 'pdf') { %>
+      <iframe
+        src="/preview/<%= link.short_id %>/stream"
+        class="preview-pdf preview-content"
+        onload="hideLoading()"
+        onerror="showError('Failed to load PDF')"
+      ></iframe>
+
+    <% } else if (previewType === 'text') { %>
+      <pre id="textContent" class="preview-text preview-content"><div class="loading">Loading...</div></pre>
+      <script>
+        // Fetch and display text content
+        fetch('/preview/<%= link.short_id %>/stream')
+          .then(res => res.text())
+          .then(text => {
+            document.getElementById('textContent').textContent = text;
+          })
+          .catch(err => {
+            document.getElementById('textContent').innerHTML = '<span style="color: #dc2626;">Error loading text file</span>';
+          });
+      </script>
+
+    <% } else if (previewType === 'video') { %>
+      <video
+        controls
+        class="preview-video preview-content"
+        onloadeddata="hideLoading()"
+        onerror="showError('Failed to load video')"
+      >
+        <source src="/preview/<%= link.short_id %>/stream" />
+        Your browser does not support video playback.
+      </video>
+
+    <% } else if (previewType === 'audio') { %>
+      <div style="text-align: center;">
+        <audio
+          controls
+          class="preview-audio preview-content"
+          onloadeddata="hideLoading()"
+          onerror="showError('Failed to load audio')"
+        >
+          <source src="/preview/<%= link.short_id %>/stream" />
+          Your browser does not support audio playback.
+        </audio>
+      </div>
+
+    <% } else { %>
+      <div class="loading">Unsupported file type for preview</div>
+    <% } %>
+  </div>
+
+  <script>
+    function hideLoading() {
+      // Loading indicator is hidden when content loads
+    }
+
+    function showError(message) {
+      alert(message);
+    }
+  </script>
+
+</body>
+</html>

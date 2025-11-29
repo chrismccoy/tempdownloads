@@ -1,0 +1,95 @@
+<%- include('../partials/header', {title: title}) %>
+
+<div class="grid grid-cols-1 min-h-screen lg:grid-cols-5">
+  <%- include('../partials/sidebar') %>
+  <main class="col-span-1 p-4 sm:p-6 lg:col-span-4 lg:p-8">
+    
+    <header
+      class="flex items-center justify-between border-b-2 border-black pb-6"
+    >
+      <div>
+        <h1 class="text-4xl font-extrabold uppercase">Dashboard</h1>
+        <p class="text-neutral-600">OVERVIEW & QUICK ACTIONS</p>
+      </div>
+      <div>
+        <a
+          href="/admin/links/new"
+          class="hidden sm:inline-block border-2 border-black px-4 py-2 text-lg font-bold uppercase hover:bg-yellow-300 transition-colors"
+        >
+          Add a Download
+        </a>
+        <button
+          @click="mobileMenuOpen = !mobileMenuOpen"
+          class="border-2 border-black px-4 py-2 text-lg font-bold uppercase hover:bg-yellow-300 lg:hidden transition-colors"
+        >
+          Menu
+        </button>
+      </div>
+    </header>
+
+    <section class="my-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      
+      <div class="relative border-2 border-black p-6 shadow-[4px_4px_0px_#000]">
+        <p class="text-sm uppercase text-neutral-600 font-bold">Total Links Created</p>
+        <p class="text-5xl font-extrabold mt-2"><%= stats.totalLinks %></p>
+      </div>
+      
+      <div class="relative border-2 border-black p-6 shadow-[4px_4px_0px_#000]">
+        <p class="text-sm uppercase text-neutral-600 font-bold">Active Links</p>
+        <p class="text-5xl font-extrabold mt-2"><%= stats.activeLinks %></p>
+      </div>
+      
+      <div class="relative border-2 border-black p-6 shadow-[4px_4px_0px_#000]">
+        <p class="text-sm uppercase text-neutral-600 font-bold">Total Page Visits</p>
+        <p class="text-5xl font-extrabold mt-2"><%= stats.totalVisits %></p>
+      </div>
+      
+      <div class="relative border-2 border-black p-6 shadow-[4px_4px_0px_#000]">
+        <p class="text-sm uppercase text-neutral-600 font-bold">Total Direct Downloads</p>
+        <p class="text-5xl font-extrabold mt-2"><%= stats.totalDownloads %></p>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      
+      <div class="border-2 border-black p-6 hover:bg-neutral-50 transition-colors">
+        <h3
+          class="mb-4 inline-block bg-black px-3 py-1 text-2xl font-bold uppercase text-yellow-300"
+        >
+          // Add New
+        </h3>
+        <p class="leading-relaxed text-neutral-800 font-bold">
+          Create a new secure download link. Files are uploaded directly to your configured storage provider (S3/Azure/Local) using secure signed URLs.
+        </p>
+        <div class="mt-6">
+          <a
+            href="/admin/links/new"
+            class="inline-block border-2 border-black bg-yellow-300 px-6 py-4 text-xl font-bold uppercase text-black transition-all duration-150 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_#000]"
+          >
+            Add New Download
+          </a>
+        </div>
+      </div>
+
+      <div class="border-2 border-black p-6 hover:bg-neutral-50 transition-colors">
+        <h3
+          class="mb-4 inline-block bg-black px-3 py-1 text-2xl font-bold uppercase text-yellow-300"
+        >
+          // Manage Links
+        </h3>
+        <p class="leading-relaxed text-neutral-800 font-bold">
+          View and manage existing links. Revoke access immediately by deleting the link, which automatically removes the file from storage.
+        </p>
+        <div class="mt-6">
+          <a
+            href="/admin/links"
+            class="inline-block border-2 border-black bg-white px-6 py-4 text-xl font-bold uppercase text-black hover:bg-neutral-100 hover:shadow-[4px_4px_0px_#000] transition-all"
+          >
+            List All Downloads
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<%- include('../partials/footer') %>

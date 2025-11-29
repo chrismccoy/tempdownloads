@@ -1,0 +1,123 @@
+<%- include('../partials/header', {title: title}) %>
+
+<div class="grid grid-cols-1 min-h-screen lg:grid-cols-5">
+  <%- include('../partials/sidebar') %>
+  <main class="col-span-1 p-4 sm:p-6 lg:col-span-4 lg:p-8 relative">
+    
+    <header class="flex items-center justify-between border-b-2 border-black pb-6">
+      <div>
+        <h1 class="text-4xl font-extrabold uppercase">Edit Download</h1>
+        <p class="break-all text-neutral-600">EDITING: <%= link.original_name %></p>
+      </div>
+      <button @click="mobileMenuOpen = !mobileMenuOpen" class="border-2 border-black px-4 py-2 text-lg font-bold uppercase hover:bg-yellow-300 lg:hidden">Menu</button>
+    </header>
+
+    <section class="my-8 max-w-2xl" 
+      x-data="fileUploader({
+        mode: 'edit',
+        csrfToken: '<%= csrfToken %>',
+        submitUrl: '/admin/links/edit/<%= link.id %>',
+        initialExpiry: '', // Let user pick new expiry if they want
+        initialLandingPage: <%= link.has_landing_page ? 'true' : 'false' %>,
+        initialBurnAfterRead: <%= link.burn_after_read ? 'true' : 'false' %>
+      })"
+    >
+      <div class="border-2 border-black p-6 bg-white">
+        <form @submit.prevent="handleSubmit">
+          
+          <div class="mb-4">
+            <label class="mb-2 block font-bold uppercase">Current File</label>
+            <div class="flex justify-between items-center border-2 border-dashed border-neutral-300 p-2 bg-neutral-50 text-neutral-600">
+               <p class="break-all font-mono text-sm"><%= link.original_name %></p>
+               <% if (link.is_encrypted) { %>
+                 <span class="text-xs bg-green-100 text-green-800 border border-green-300 px-1 font-bold uppercase ml-2">Encrypted</span>
+               <% } %>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="mb-2 block font-bold uppercase">Replace File (Optional)</label>
+            <div 
+              class="relative border-2 border-dashed border-black bg-neutral-50 p-6 text-center transition-colors"
+              :class="{'hover:bg-yellow-50': !file, 'bg-green-50 border-solid': file}"
+            >
+              <input type="file" @change="file = $event.target.files[0]; validateFile(file)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+              <div x-show="!file"><p class="text-md font-bold">Drop new file here to replace</p></div>
+              <div x-show="file">
+                <p class="text-lg font-bold text-green-700" x-text="file ? file.name : ''"></p>
+                <p class="text-sm font-bold text-neutral-600" x-text="file ? (file.size / 1024 / 1024).toFixed(2) + ' MB' : ''"></p>
+              </div>
+            </div>
+            <p x-show="error" class="text-red-600 font-bold mt-2 bg-red-100 p-2 border-2 border-red-200" x-text="error"></p>
+          </div>
+
+          <div x-show="isUploading" class="mb-4" x-cloak>
+            <label class="mb-1 block text-xs font-bold uppercase flex justify-between">
+              <span>Uploading...</span>
+              <span x-text="progress + '%'"></span>
+            </label>
+            <div class="w-full border-2 border-black h-6 p-0.5">
+              <div class="h-full bg-black transition-all duration-150" :style="`width: ${progress}%`"></div>
+            </div>
+          </div>
+
+          <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col justify-end">
+              <label class="mb-2 block font-bold uppercase">
+                Update Expiration
+                <% if (link.expires_at) { %>
+                  <span class="block text-xs font-normal text-neutral-500 mt-1">Current: <%= new Date(link.expires_at).toLocaleDateString() %></span>
+                <% } else { %>
+                  <span class="block text-xs font-normal text-neutral-500 mt-1">Current: Never</span>
+                <% } %>
+              </label>
+              <select name="expiry" x-model="expiry" class="expiry-select w-full border-2 border-black bg-white p-2.5 focus:bg-yellow-300 outline-none">
+                <option value="" selected>Keep Current Expiration</option>
+                <option value="60">1 Minute</option>
+                <option value="3600">1 Hour</option>
+                <option value="86400">24 Hours</option>
+                <option value="604800">1 Week</option>
+                <option value="31536000">1 Year</option>
+                <option value="never">Make Permanent</option>
+                <option value="custom">Set New Custom Date...</option>
+              </select>
+            </div>
+            <div class="flex flex-col justify-end">
+              <label class="mb-2 block font-bold uppercase">
+                New Password
+                <% if (link.password_hash) { %>
+                  <span class="block text-xs font-normal text-green-600 mt-1">Currently Protected</span>
+                <% } else { %>
+                  <span class="block text-xs font-normal text-neutral-400 mt-1">Currently Unprotected</span>
+                <% } %>
+              </label>
+              <input type="password" x-model="password" placeholder="Leave blank to keep current" class="w-full border-2 border-black p-2.5 focus:bg-yellow-300 outline-none" />
+            </div>
+          </div>
+
+          <div x-show="expiry === 'custom'" x-cloak class="mb-4">
+            <label class="mb-2 block font-bold uppercase">New Custom Date</label>
+            <input type="datetime-local" x-model="customExpiry" class="w-full border-2 border-black p-2 focus:bg-yellow-300" />
+          </div>
+
+          <div class="mb-4 space-y-2 bg-neutral-100 p-4 border-2 border-black">
+            <label class="flex cursor-pointer items-center space-x-3 font-bold select-none">
+              <input type="checkbox" x-model="landingPage" class="h-5 w-5 border-2 border-black text-black focus:ring-0" />
+              <span class="uppercase">Show download landing page</span>
+            </label>
+            <label class="flex cursor-pointer items-center space-x-3 font-bold text-red-800 select-none">
+              <input type="checkbox" x-model="burnAfterRead" class="h-5 w-5 border-2 border-black text-red-600 focus:ring-0" />
+              <span class="uppercase">Burn After Read (Delete after 1 download)</span>
+            </label>
+          </div>
+
+          <button type="submit" :disabled="isUploading || error !== ''" class="w-full border-2 border-black bg-yellow-300 px-4 py-3 font-bold uppercase text-black hover:bg-black hover:text-yellow-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+             <span x-show="!isUploading">Update Link</span>
+             <span x-show="isUploading">Processing...</span>
+          </button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<%- include('../partials/footer') %>

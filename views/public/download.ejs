@@ -1,0 +1,113 @@
+<%- include('../partials/header', {title: 'Download: ' + link.original_name}) %>
+
+<div class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+  
+  <header class="flex items-center justify-between border-b-4 border-black py-4">
+    <h1 class="text-2xl font-bold uppercase md:text-3xl">
+      <a href="/" class="px-2 py-1 hover:bg-yellow-300">Temp Downloads</a>
+    </h1>
+  </header>
+
+  <main class="flex w-full flex-grow flex-col items-center justify-center pt-12 text-center">
+    
+    <section
+      class="mb-12 w-full border-4 border-black px-6 py-12 md:py-16 shadow-[8px_8px_0px_#000] <%= link.is_expired ? 'bg-red-50' : 'bg-yellow-50' %>"
+    >
+      <p class="text-lg uppercase font-bold <%= link.is_expired ? 'text-red-800' : 'text-neutral-600' %>">
+        <%= link.is_expired ? 'Link Has Expired' : 'Secure Asset Download' %>
+      </p>
+      
+      <h2 class="mt-2 break-all text-5xl font-extrabold uppercase tracking-tighter md:text-7xl lg:text-8xl">
+        <%= link.original_name %>
+      </h2>
+      
+      <p class="mx-auto mt-6 max-w-2xl text-xl text-black font-bold">
+        <%= link.is_expired 
+            ? 'This download link is no longer valid and the file has been removed.' 
+            : 'Your secure download is ready.' + (link.expires_at ? ' This link is temporary.' : '') %>
+      </p>
+    </section>
+
+    <section class="mx-auto w-full max-w-lg">
+      <% if (link.is_expired) { %>
+
+      <button
+        disabled
+        class="block w-full cursor-not-allowed border-2 border-black bg-neutral-300 px-8 py-6 text-2xl font-bold uppercase text-neutral-500"
+      >
+        Download Expired
+      </button>
+
+      <% } else { %>
+
+      <% if (link.can_preview) { %>
+      <a
+        href="/preview/<%= link.short_id %>"
+        class="block w-full border-2 border-black bg-white px-8 py-6 text-2xl font-bold uppercase text-black transition-all duration-150 hover:bg-yellow-100 hover:shadow-[4px_4px_0px_#000] mb-4"
+      >
+        👁️ Preview File
+      </a>
+      <% } %>
+
+      <a
+        href="/d/<%= link.token %>"
+        id="download-button"
+        class="block w-full border-2 border-black bg-yellow-300 px-8 py-6 text-2xl font-bold uppercase text-black transition-all duration-150 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_#000]"
+      >
+        ⬇ Download File
+      </a>
+
+      <% } %>
+    </section>
+
+    <section class="mx-auto mt-12 w-full max-w-xl space-y-4 border-2 border-black bg-white p-6 text-left shadow-md">
+      <h3 class="mb-4 inline-block bg-black px-3 py-1 text-2xl font-bold uppercase text-yellow-300">
+        // File Manifest
+      </h3>
+      <div class="divide-y-2 divide-black">
+        <div class="flex flex-wrap p-2">
+          <span class="w-1/3 font-bold uppercase">Asset Name:</span>
+          <span class="w-2/3 break-all font-mono text-sm"><%= link.original_name %></span>
+        </div>
+        <div class="flex flex-wrap p-2">
+          <span class="w-1/3 font-bold uppercase">File Type:</span>
+          <span class="w-2/3 font-mono"><%= link.file_extension %></span>
+        </div>
+        <div class="flex flex-wrap p-2">
+          <span class="w-1/3 font-bold uppercase">File Size:</span>
+          <span class="w-2/3 font-mono"><%= link.file_size %></span>
+        </div>
+        <div class="flex flex-wrap p-2">
+          <span class="w-1/3 font-bold uppercase">Status:</span>
+          <span class="w-2/3 font-bold <%= link.is_expired ? 'text-red-600' : 'text-green-700' %>">
+            <%= link.is_expired 
+                ? 'Expired' 
+                : (link.expires_at ? `Expires ${new Date(link.expires_at).toLocaleString()}` : 'Does not Expire') %>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <% if (link.burn_after_read) { %>
+      <section class="mx-auto mt-8 w-full max-w-xl border-2 border-black bg-red-100 p-6 text-left text-red-900">
+        <h3 class="mb-2 inline-block bg-red-600 px-2 py-1 text-lg font-extrabold uppercase text-white">
+          // SELF DESTRUCT ACTIVE
+        </h3>
+        <p class="font-bold uppercase">
+          Warning: This file will be permanently deleted immediately after you download it. Do not reload this page.
+        </p>
+      </section>
+    <% } else if (link.expires_at && !link.is_expired) { %>
+      <section class="mx-auto mt-12 w-full max-w-xl border-2 border-black bg-red-50 p-6 text-left text-red-800">
+        <h3 class="mb-4 inline-block bg-red-800 px-3 py-1 text-2xl font-extrabold uppercase text-white">
+          // NOTICE
+        </h3>
+        <p class="font-bold uppercase">
+          This is a temporary link. Sharing is discouraged as it will expire automatically.
+        </p>
+      </section>
+    <% } %>
+  </main>
+</div>
+
+<%- include('../partials/footer') %>

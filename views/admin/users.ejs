@@ -1,0 +1,79 @@
+<%- include('../partials/header', {title: title}) %>
+
+<div class="grid grid-cols-1 min-h-screen lg:grid-cols-5">
+  <%- include('../partials/sidebar') %>
+  <main class="col-span-1 p-4 sm:p-6 lg:col-span-4 lg:p-8 relative">
+    
+    <header class="flex items-center justify-between border-b-2 border-black pb-6">
+      <h1 class="text-4xl font-extrabold uppercase">User Management</h1>
+      
+      <a 
+        href="/admin/users/new" 
+        class="border-2 border-black px-4 py-2 text-lg font-bold uppercase hover:bg-yellow-300 transition-colors"
+      >
+        + Add User
+      </a>
+    </header>
+
+    <section class="mt-8 overflow-x-auto border-2 border-black shadow-md">
+      <table class="w-full">
+        <thead class="bg-black text-yellow-300">
+          <tr>
+            <th class="p-4 text-left uppercase">User</th>
+            <th class="p-4 text-left uppercase">Role</th>
+            <th class="p-4 text-left uppercase">Status</th>
+            <th class="p-4 text-left uppercase">Joined</th>
+            <th class="p-4 text-left uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody x-data>
+          <% users.forEach(u => { %>
+          <tr class="border-b-2 border-black last:border-b-0 hover:bg-neutral-50 transition-colors">
+            
+            <td class="p-4 font-bold">
+              <%= u.username %>
+              <% if (user.id === u.id) { %> 
+                <span class="text-xs bg-yellow-300 px-1 border border-black ml-2 font-mono uppercase">(YOU)</span>
+              <% } %>
+            </td>
+            
+            <td class="p-4 uppercase text-sm"><%= u.role %></td>
+            
+            <td class="p-4 uppercase font-bold text-sm">
+              <span class="<%= u.status === 'active' ? 'text-green-600' : (u.status === 'pending' ? 'text-yellow-600' : 'text-red-600') %>">
+                <%= u.status %>
+              </span>
+            </td>
+            
+            <td class="p-4 text-sm text-neutral-600"><%= new Date(u.created_at).toLocaleDateString() %></td>
+            
+            <td class="p-4 space-x-2">
+              <% if (u.status === 'pending' || u.status === 'revoked') { %>
+                <button 
+                  @click="fetch('/admin/users/<%= u.id %>/approve', {method:'PATCH', headers:{'x-csrf-token': '<%= csrfToken %>'}}).then(()=>window.location.reload())"
+                  class="bg-green-500 text-white px-3 py-1 text-xs font-bold uppercase border-2 border-black hover:bg-black transition-colors"
+                >Approve</button>
+              <% } %>
+              
+              <% if (u.status === 'active' && u.id !== user.id) { %>
+                <button 
+                  @click="if(confirm('Revoke access for this user?')) fetch('/admin/users/<%= u.id %>/revoke', {method:'PATCH', headers:{'x-csrf-token': '<%= csrfToken %>'}}).then(()=>window.location.reload())"
+                  class="bg-red-500 text-white px-3 py-1 text-xs font-bold uppercase border-2 border-black hover:bg-black transition-colors"
+                >Revoke</button>
+              <% } %>
+
+              <% if (u.role !== 'admin') { %>
+                <button 
+                  @click="if(confirm('Make Admin?')) fetch('/admin/users/<%= u.id %>/promote', {method:'PATCH', headers:{'x-csrf-token': '<%= csrfToken %>'}}).then(()=>window.location.reload())"
+                  class="bg-blue-500 text-white px-3 py-1 text-xs font-bold uppercase border-2 border-black hover:bg-black transition-colors"
+                >Make Admin</button>
+              <% } %>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</div>
+<%- include('../partials/footer') %>

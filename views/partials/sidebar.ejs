@@ -1,0 +1,112 @@
+<aside
+  id="sidebar"
+  class="hidden lg:flex lg:flex-col col-span-1 bg-neutral-50 border-r-4 border-black min-h-screen"
+  :class="mobileMenuOpen ? 'block fixed inset-0 z-50 overflow-y-auto bg-neutral-50' : 'hidden lg:flex'"
+>
+  <div class="p-6 border-b-4 border-black flex justify-between items-center lg:block">
+    <div>
+      <h1 class="text-2xl font-bold uppercase">
+        <a href="/admin" class="hover:bg-yellow-300">Downloads</a>
+      </h1>
+      <p class="text-sm text-neutral-600">Admin Panel</p>
+    </div>
+    <button @click="mobileMenuOpen = false" class="lg:hidden font-bold text-2xl">&times;</button>
+  </div>
+  
+  <nav class="flex-grow p-6">
+    <h2 class="text-sm uppercase text-neutral-500 mb-4">// Main</h2>
+    
+    <ul class="space-y-3">
+      <li>
+        <a
+          href="/admin"
+          class="block font-bold uppercase p-2 border-2 border-transparent transition-colors <%= currentPath === '/admin' ? 'bg-yellow-300 border-black' : 'hover:bg-yellow-300' %>"
+          >Dashboard</a
+        >
+      </li>
+      
+      <li>
+        <a
+          href="/admin/links/new"
+          class="block font-bold uppercase p-2 border-2 border-transparent transition-colors <%= currentPath === '/admin/links/new' ? 'bg-yellow-300 border-black' : 'hover:bg-yellow-300' %>"
+          >Add a Download</a
+        >
+      </li>
+      
+      <li>
+        <a
+          href="/admin/links"
+          class="block font-bold uppercase p-2 border-2 border-transparent transition-colors <%= currentPath === '/admin/links' ? 'bg-yellow-300 border-black' : 'hover:bg-yellow-300' %>"
+          >My Downloads</a
+        >
+      </li>
+
+      <li>
+        <a
+          href="/admin/preferences"
+          class="block font-bold uppercase p-2 border-2 border-transparent transition-colors <%= currentPath === '/admin/preferences' ? 'bg-yellow-300 border-black' : 'hover:bg-yellow-300' %>"
+          >⚙️ Preferences</a
+        >
+      </li>
+
+      <li class="pt-4 border-t border-neutral-300 mt-4">
+         <a
+          href="/admin/trash"
+          class="block font-bold uppercase p-2 border-2 border-transparent text-red-800 transition-colors <%= currentPath === '/admin/trash' ? 'bg-red-100 border-red-800' : 'hover:bg-red-50' %>"
+          >🗑️ Trash Can</a
+        >
+      </li>
+      
+      <% if (user && user.role === 'admin') { %>
+      <li class="pt-4 border-t border-neutral-300 mt-4">
+        <h2 class="text-sm uppercase text-neutral-500 mb-2">// Super Admin</h2>
+        <ul class="space-y-3">
+          
+          <li>
+            <a
+              href="/admin/users"
+              class="block font-bold uppercase p-2 border-2 border-transparent text-blue-800 transition-colors <%= currentPath && currentPath.startsWith('/admin/users') ? 'bg-blue-100 border-blue-800' : 'hover:bg-blue-50' %>"
+            >
+              👥 Users
+            </a>
+          </li>
+          
+          <li>
+            <a
+              href="/admin/audit"
+              class="block font-bold uppercase p-2 border-2 border-transparent text-neutral-800 transition-colors <%= currentPath === '/admin/audit' ? 'bg-neutral-200 border-black' : 'hover:bg-neutral-200' %>"
+            >
+              📜 Audit Logs
+            </a>
+          </li>
+        </ul>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+  
+  <div class="p-6 mt-auto border-t-2 border-black bg-white">
+    <div class="mb-4">
+      <p class="font-bold text-xs text-neutral-500 uppercase">Logged in as</p>
+      <div class="flex items-center justify-between mt-1">
+         <p class="font-bold truncate max-w-[150px]" title="<%= user ? user.username : 'Guest' %>">
+            <%= user ? user.username : 'Guest' %>
+         </p>
+         
+         <% if (user && user.role === 'admin') { %>
+           <span class="text-[10px] bg-black text-white px-1 py-0.5 font-bold uppercase tracking-wider">Admin</span>
+         <% } %>
+      </div>
+    </div>
+    
+    <form method="POST" action="/logout">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <button
+        type="submit"
+        class="block w-full text-center border-2 border-black bg-neutral-100 px-4 py-2 text-sm font-bold uppercase hover:bg-black hover:text-white transition-colors cursor-pointer"
+      >
+        Logout
+      </button>
+    </form>
+  </div>
+</aside>

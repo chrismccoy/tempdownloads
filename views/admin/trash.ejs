@@ -1,0 +1,259 @@
+<%- include('../partials/header', {title: title}) %>
+
+<div class="grid grid-cols-1 min-h-screen lg:grid-cols-5">
+  <%- include('../partials/sidebar') %>
+  <main class="col-span-1 p-4 sm:p-6 lg:col-span-4 lg:p-8 relative">
+    
+    <header class="flex items-center justify-between border-b-2 border-black pb-6">
+      <div>
+        <h1 class="text-4xl font-extrabold uppercase">Trash Can</h1>
+        <p class="text-neutral-600">DELETED ITEMS (Auto-Purged after retention period)</p>
+      </div>
+      <button @click="mobileMenuOpen = !mobileMenuOpen" class="border-2 border-black px-4 py-2 text-lg font-bold uppercase hover:bg-yellow-300 lg:hidden">Menu</button>
+    </header>
+
+    <section class="mt-6 border-2 border-black p-4 bg-neutral-50" x-data="{ showSearch: <%= filters.search ? 'true' : 'false' %> }">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold uppercase">Search</h2>
+        <button @click="showSearch = !showSearch" class="text-sm font-bold uppercase underline hover:bg-yellow-300 px-2 py-1">
+          <span x-text="showSearch ? 'Hide' : 'Show'"></span>
+        </button>
+      </div>
+
+      <form method="GET" action="/admin/trash" x-show="showSearch" x-cloak>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            name="search"
+            value="<%= filters.search || '' %>"
+            placeholder="Search by filename or Short ID..."
+            class="flex-grow border-2 border-black p-2 focus:bg-yellow-100"
+          />
+          <button type="submit" class="border-2 border-black bg-yellow-300 px-6 py-2 font-bold uppercase hover:bg-black hover:text-yellow-300 transition-colors">
+            Search
+          </button>
+          <a href="/admin/trash" class="border-2 border-black bg-neutral-200 px-6 py-2 font-bold uppercase hover:bg-white transition-colors inline-block">
+            Clear
+          </a>
+        </div>
+      </form>
+    </section>
+
+    <section class="mt-6" x-data="batchOperations()" @link-restored="linkCount--" @link-purged="linkCount--">
+
+      <div
+        x-show="toast.show"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform translate-y-2"
+        x-transition:enter-end="opacity-100 transform translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 transform translate-y-0"
+        x-transition:leave-end="opacity-0 transform translate-y-2"
+        :class="toast.type === 'success' ? 'bg-green-100 border-green-500 text-green-800' : 'bg-red-100 border-red-500 text-red-800'"
+        class="fixed top-4 right-4 z-50 border-2 px-6 py-4 font-bold shadow-lg max-w-md"
+        x-cloak
+      >
+        <div class="flex items-center justify-between gap-4">
+          <span x-text="toast.message"></span>
+          <button @click="toast.show = false" class="font-bold hover:opacity-70">&times;</button>
+        </div>
+      </div>
+
+      <div
+        x-show="confirm.show"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        x-cloak
+      >
+        <div class="bg-white border-2 border-black p-6 shadow-lg max-w-md w-full mx-4">
+          <h3 class="text-xl font-bold uppercase mb-2" x-text="confirm.title"></h3>
+          <p class="text-neutral-600 mb-6" x-text="confirm.message"></p>
+          <div class="flex gap-2 justify-end">
+            <button
+              @click="handleConfirm(false)"
+              class="border-2 border-black bg-neutral-200 px-4 py-2 font-bold uppercase hover:bg-white transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              @click="handleConfirm(true)"
+              :class="confirm.isDanger ? 'bg-red-600 text-white hover:bg-black hover:text-red-500' : 'bg-yellow-300 hover:bg-black hover:text-yellow-300'"
+              class="border-2 border-black px-4 py-2 font-bold uppercase transition-colors"
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div x-show="selectedIds.length > 0" x-cloak class="mb-4 border-2 border-black bg-yellow-100 p-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <span class="font-bold">
+            <span x-text="selectedIds.length"></span> item(s) selected
+          </span>
+          <div class="flex gap-2">
+            <button @click="batchRestore()" class="border-2 border-black bg-green-400 px-4 py-2 font-bold uppercase hover:bg-black hover:text-green-400 transition-colors">
+              Restore
+            </button>
+            <button @click="batchForceDelete()" class="border-2 border-black bg-red-600 px-4 py-2 font-bold uppercase text-white hover:bg-black hover:text-red-600 transition-colors">
+              Delete Forever
+            </button>
+            <button @click="clearSelection()" class="border-2 border-black bg-neutral-200 px-4 py-2 font-bold uppercase hover:bg-white transition-colors">
+              Clear Selection
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div x-show="linkCount > 0" class="overflow-x-auto border-2 border-black bg-neutral-50 shadow-md">
+        <table class="w-full">
+          <thead class="bg-black text-yellow-300">
+            <tr>
+              <th class="p-4 text-left uppercase w-12">
+                <input type="checkbox" @change="toggleAll($event)" class="w-5 h-5 cursor-pointer" />
+              </th>
+              <th class="p-4 text-left uppercase">File</th>
+              <th class="p-4 text-left uppercase">Deleted On</th>
+              <th class="p-4 text-left uppercase">Purge In</th>
+              <th class="p-4 text-left uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% links.forEach(link => { %>
+            <tr
+              class="border-b-2 border-black last:border-b-0 hover:bg-neutral-100 transition-colors"
+              data-link-id="<%= link.id %>"
+              x-data="trashItem({ id: '<%= link.id %>', csrfToken: '<%= csrfToken %>' })"
+            >
+              <td class="align-top p-4 pt-6 text-center">
+                <input
+                  type="checkbox"
+                  :checked="isSelected('<%= link.id %>')"
+                  @change="toggleSelection('<%= link.id %>')"
+                  class="w-5 h-5 cursor-pointer"
+                />
+              </td>
+              <td class="align-top space-y-2 p-4 pt-6 font-bold text-center max-w-xs break-words opacity-60">
+                <%= link.original_name %>
+              </td>
+
+              <td class="align-top space-y-2 p-4 pt-6 text-sm">
+                <%= new Date(link.deleted_at).toLocaleString() %>
+              </td>
+
+              <td class="align-top space-y-2 p-4 pt-6 font-bold text-red-600">
+                <%= link.days_until_purge %> Days
+              </td>
+
+              <td class="align-top p-4">
+                <div x-show="!showConfirm" class="space-y-2">
+                  <button @click="restoreLink()" :disabled="isProcessing" class="w-full border-2 border-black bg-green-400 p-2 text-sm font-bold uppercase hover:bg-black hover:text-green-400 disabled:opacity-50 transition-colors">Restore</button>
+                  <button @click="showConfirm = true" class="w-full border-2 border-black bg-red-500 p-2 text-sm font-bold uppercase text-white hover:bg-black hover:text-red-500 transition-colors">Delete Forever</button>
+                </div>
+
+                <div x-show="showConfirm" x-cloak class="space-y-2">
+                  <p class="text-center font-bold uppercase text-red-600 text-xs">Permanently?</p>
+                  <button @click="forceDelete()" :disabled="isProcessing" class="w-full border-2 border-black bg-red-600 p-2 text-sm font-bold uppercase text-white disabled:opacity-50">Yes</button>
+                  <button @click="showConfirm = false" class="w-full border-2 border-black bg-neutral-200 p-2 text-sm font-bold uppercase hover:bg-white">Cancel</button>
+                </div>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <div x-show="linkCount === 0" x-cloak class="border-2 border-black bg-green-50 p-8 text-center">
+        <h3 class="mb-4 text-2xl font-bold uppercase">
+          <% if (filters.search) { %>
+            No Results Found
+          <% } else { %>
+            Trash is Empty
+          <% } %>
+        </h3>
+        <p class="mx-auto mb-6 max-w-md text-neutral-600">
+          <% if (filters.search) { %>
+            No deleted items match your search criteria. Try adjusting your search term.
+          <% } else { %>
+            There are no deleted items waiting to be purged.
+          <% } %>
+        </p>
+        <a href="/admin/links" class="inline-block border-2 border-black bg-white px-6 py-4 text-xl font-bold uppercase text-black hover:bg-neutral-100">Back to Downloads</a>
+      </div>
+
+      <% if (pagination.totalPages > 1) { %>
+      <div class="mt-6 flex items-center justify-between border-t-2 border-black pt-6">
+        <div class="text-sm text-neutral-600">
+          Showing <b><%= ((pagination.page - 1) * pagination.limit) + 1 %></b> to <b><%= Math.min(pagination.page * pagination.limit, pagination.total) %></b> of <b><%= pagination.total %></b> results
+        </div>
+
+        <div class="flex gap-2">
+          <%
+          // Build query string with search preserved
+          const buildQueryString = (page) => {
+            const params = new URLSearchParams();
+            params.set('page', page);
+            if (filters.search) params.set('search', filters.search);
+            return '?' + params.toString();
+          };
+          %>
+
+          <% if (pagination.hasPrev) { %>
+            <a href="<%= buildQueryString(pagination.page - 1) %>" class="border-2 border-black bg-neutral-200 px-4 py-2 font-bold uppercase hover:bg-yellow-300 transition-colors">
+              &laquo; Prev
+            </a>
+          <% } else { %>
+            <span class="border-2 border-neutral-300 bg-neutral-100 px-4 py-2 font-bold uppercase text-neutral-400 cursor-not-allowed">
+              &laquo; Prev
+            </span>
+          <% } %>
+
+          <div class="hidden sm:flex gap-2">
+            <%
+            const maxPages = 5;
+            let startPage = Math.max(1, pagination.page - 2);
+            let endPage = Math.min(pagination.totalPages, startPage + maxPages - 1);
+
+            if (endPage - startPage < maxPages - 1) {
+              startPage = Math.max(1, endPage - maxPages + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) { %>
+              <% if (i === pagination.page) { %>
+                <span class="border-2 border-black bg-yellow-300 px-4 py-2 font-bold">
+                  <%= i %>
+                </span>
+              <% } else { %>
+                <a href="<%= buildQueryString(i) %>" class="border-2 border-black bg-white px-4 py-2 font-bold hover:bg-yellow-100 transition-colors">
+                  <%= i %>
+                </a>
+              <% } %>
+            <% } %>
+          </div>
+
+          <span class="sm:hidden border-2 border-black bg-yellow-300 px-4 py-2 font-bold">
+            <%= pagination.page %> / <%= pagination.totalPages %>
+          </span>
+
+          <% if (pagination.hasNext) { %>
+            <a href="<%= buildQueryString(pagination.page + 1) %>" class="border-2 border-black bg-neutral-200 px-4 py-2 font-bold uppercase hover:bg-yellow-300 transition-colors">
+              Next &raquo;
+            </a>
+          <% } else { %>
+            <span class="border-2 border-neutral-300 bg-neutral-100 px-4 py-2 font-bold uppercase text-neutral-400 cursor-not-allowed">
+              Next &raquo;
+            </span>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+
+    </section>
+  </main>
+</div>
+<%- include('../partials/footer') %>

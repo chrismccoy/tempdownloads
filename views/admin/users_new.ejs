@@ -1,0 +1,82 @@
+<%- include('../partials/header', {title: 'Add New User'}) %>
+
+<div class="grid grid-cols-1 min-h-screen lg:grid-cols-5">
+  
+  <%- include('../partials/sidebar') %>
+  
+  <main class="col-span-1 p-4 sm:p-6 lg:col-span-4 lg:p-8 relative">
+    
+    <header class="flex items-center justify-between border-b-2 border-black pb-6">
+      <div>
+        <h1 class="text-4xl font-extrabold uppercase">Add New User</h1>
+        <p class="text-neutral-600">MANUALLY CREATE AN ACCOUNT</p>
+      </div>
+      <a
+        href="/admin/users"
+        class="border-2 border-black px-4 py-2 text-lg font-bold uppercase hover:bg-neutral-200 transition-colors"
+      >
+        Back
+      </a>
+    </header>
+
+    <section class="my-8 max-w-lg">
+      <div class="border-2 border-black p-8 bg-white shadow-[8px_8px_0px_#000]">
+        
+        <form action="/admin/users" method="POST">
+          
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+          <div class="mb-4">
+            <label class="block font-bold uppercase mb-2">Username</label>
+            <input 
+              type="text" 
+              name="username" 
+              required 
+              class="w-full px-3 py-2 border-2 border-black focus:bg-yellow-300 outline-none transition-colors"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block font-bold uppercase mb-2">Password</label>
+            <input 
+              type="password" 
+              name="password" 
+              required 
+              minlength="8"
+              class="w-full px-3 py-2 border-2 border-black focus:bg-yellow-300 outline-none transition-colors"
+            />
+          </div>
+
+          <div class="mb-6 p-4 bg-neutral-100 border-2 border-black">
+            <label class="flex items-center space-x-3 cursor-pointer select-none">
+              <input 
+                type="checkbox" 
+                name="isAdmin" 
+                class="h-6 w-6 border-2 border-black text-black focus:ring-0" 
+              />
+              <span class="font-bold uppercase">Grant Admin Privileges</span>
+            </label>
+            <p class="text-xs text-neutral-600 mt-2 ml-9">
+              Admins can manage all users and see all files. Regular users can only manage their own files.
+            </p>
+          </div>
+
+          <% if (error) { %>
+            <div class="bg-red-100 text-red-800 p-3 border-2 border-black mb-4 font-bold text-sm uppercase">
+              <%= error %>
+            </div>
+          <% } %>
+
+          <button
+            type="submit"
+            class="w-full bg-black text-white font-bold py-3 px-4 border-2 border-transparent hover:bg-yellow-300 hover:text-black hover:border-black uppercase transition-colors"
+          >
+            Create User
+          </button>
+        </form>
+
+      </div>
+    </section>
+  </main>
+</div>
+<%- include('../partials/footer') %>

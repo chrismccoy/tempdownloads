@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Remove default outline ring on focus for inputs and selects to allow custom styling */
+input:focus, select:focus {
+  outline: none;
+}

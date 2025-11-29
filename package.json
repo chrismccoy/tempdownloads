@@ -1,0 +1,59 @@
+{
+  "name": "tempdownloads",
+  "version": "1.0.0",
+  "description": "A self-hosted, secure, multi-user file sharing platform.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js | pino-pretty",
+    "db:migrate": "npx knex migrate:latest --knexfile db/knexfile.js",
+    "db:rollback": "npx knex migrate:rollback --knexfile db/knexfile.js",
+    "build:css": "tailwindcss -i ./public/css/app.scss -o ./public/css/app.css --minify",
+    "watch:css": "tailwindcss -i ./public/css/app.scss -o ./public/css/app.css --watch",
+    "build:all": "npm run db:migrate && npm run build:css",
+    "build:run": "npm run db:migrate && npm run build:css && node server.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.400.0",
+    "@aws-sdk/s3-request-presigner": "^3.400.0",
+    "@azure/storage-blob": "^12.17.0",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.4.6",
+    "busboy": "^1.6.0",
+    "connect-sqlite3": "^0.9.13",
+    "cookie-parser": "^1.4.6",
+    "csrf-csrf": "^3.2.2",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.9",
+    "express": "^5.1.0",
+    "express-async-handler": "^1.2.0",
+    "express-rate-limit": "^8.2.1",
+    "express-session": "^1.18.0",
+    "helmet": "^8.1.0",
+    "knex": "^3.1.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.13",
+    "pino": "^10.1.0",
+    "qrcode": "^1.5.4",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11",
+    "pino-pretty": "^13.1.2",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^3.4.18"
+  },
+  "optionalDependencies": {
+    "bullmq": "^5.1.0",
+    "ioredis": "^5.3.2"
+  },
+  "peerDependenciesMeta": {
+    "ioredis": {
+      "optional": true
+    },
+    "bullmq": {
+      "optional": true
+    }
+  }
+}
